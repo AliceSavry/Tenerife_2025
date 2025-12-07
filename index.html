@@ -15,6 +15,7 @@
             --red: #e63946;
             --green: #2a9d8f;
             --blue: #0077b6;
+            --purple: #9b5de5;
             --bg: #f8f9fa;
             --card-bg: #ffffff;
         }
@@ -84,6 +85,7 @@
             gap: 10px;
         }
 
+        .cat-hotel { background-color: var(--purple); }
         .cat-resto { background-color: var(--red); }
         .cat-view { background-color: var(--green); }
         .cat-visit { background-color: var(--blue); }
@@ -151,6 +153,7 @@
             gap: 15px;
             font-size: 0.8rem;
             border-bottom: 1px solid #ddd;
+            flex-wrap: wrap;
         }
         .dot { height: 10px; width: 10px; border-radius: 50%; display: inline-block; margin-right: 4px; }
 
@@ -172,13 +175,14 @@
 
 <header>
     <h1>Tenerife : Le Carnet</h1>
-    <p class="subtitle">Itinéraires & Adresses</p>
+    <p class="subtitle">Vigilia Park & Road Trip</p>
 </header>
 
 <div class="container">
     
     <div class="map-panel">
         <div class="legend-bar">
+            <span><span class="dot" style="background:var(--purple)"></span>Hôtel</span>
             <span><span class="dot" style="background:var(--red)"></span>Miam</span>
             <span><span class="dot" style="background:var(--green)"></span>Vues</span>
             <span><span class="dot" style="background:var(--blue)"></span>Visites</span>
@@ -187,6 +191,21 @@
     </div>
 
     <div class="list-panel">
+
+        <div class="category-card">
+            <div class="cat-header cat-hotel">
+                🏠 Logement
+            </div>
+            <ul>
+                <li>
+                    <div class="li-info" onclick="focusMap(28.2395, -16.8409)">
+                        <span class="item-name">Vigilia Park</span>
+                        <span class="item-desc">Avda. Quinto Centenario, 58, Puerto de Santiago.</span>
+                    </div>
+                    <a href="https://maps.google.com/?cid=14774556268881489990&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQ" target="_blank" class="btn-gps">📍 GO</a>
+                </li>
+            </ul>
+        </div>
 
         <div class="category-card">
             <div class="cat-header cat-resto">
@@ -380,13 +399,15 @@
         });
     }
 
+    var hotelIcon = createIcon('violet'); // Utilisation du violet pour l'hôtel
     var restoIcon = createIcon('red');
     var viewIcon = createIcon('green');
     var visitIcon = createIcon('blue');
     var defaultIcon = createIcon('grey');
 
     // --- CARTE ---
-    var map = L.map('map').setView([28.2916, -16.6291], 10);
+    // Centrage initial sur l'hôtel Vigilia Park
+    var map = L.map('map').setView([28.2395, -16.8409], 11);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '© OpenStreetMap'
@@ -394,6 +415,9 @@
 
     // --- DONNÉES AVEC LIENS ---
     var points = [
+        // Hôtel
+        { coords: [28.2395, -16.8409], title: "Vigilia Park (Hôtel)", type: "hotel", url: "https://maps.google.com/?cid=14774556268881489990&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQ" },
+
         // Restos
         { coords: [28.2428, -16.7937], title: "El Rancho", type: "resto", url: "https://www.google.com/maps/search/?api=1&query=Restaurante+El+Rancho+Tenerife" },
         { coords: [28.3947, -16.6396], title: "Las Aguas", type: "resto", url: "https://www.google.com/maps/search/?api=1&query=Restaurante+Las+Aguas+San+Juan+de+la+Rambla" },
@@ -425,6 +449,7 @@
 
     points.forEach(point => {
         var chosenIcon = defaultIcon;
+        if (point.type === 'hotel') chosenIcon = hotelIcon;
         if (point.type === 'resto') chosenIcon = restoIcon;
         if (point.type === 'view') chosenIcon = viewIcon;
         if (point.type === 'visit') chosenIcon = visitIcon;
@@ -441,7 +466,7 @@
 
     // Fonction pour zoomer
     function focusMap(lat, lng) {
-        map.flyTo([lat, lng], 13);
+        map.flyTo([lat, lng], 14);
         if (window.innerWidth < 900) {
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
