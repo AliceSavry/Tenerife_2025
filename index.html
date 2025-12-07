@@ -43,41 +43,28 @@
             margin: 0 auto;
             display: flex;
             flex-direction: column;
-            height: calc(100vh - 80px); /* Hauteur restante */
+            height: calc(100vh - 80px);
         }
 
-        /* Sur mobile : carte en haut, listes en bas */
         @media(min-width: 900px) {
-            .container {
-                flex-direction: row;
-            }
-            .list-panel {
-                width: 40%;
-                overflow-y: auto;
-                padding: 20px;
-            }
-            .map-panel {
-                width: 60%;
-                position: relative;
-            }
-            #map { height: 100%; border-radius: 0; }
+            .container { flex-direction: row; }
+            .list-panel { width: 40%; overflow-y: auto; padding: 20px; }
+            .map-panel { width: 60%; position: relative; }
+            #map { height: 100%; }
         }
 
         @media(max-width: 899px) {
             .map-panel {
-                height: 40vh; /* Carte prend 40% de l'écran */
+                height: 40vh;
                 width: 100%;
                 position: sticky;
                 top: 0;
                 z-index: 1000;
             }
-            .list-panel {
-                padding: 15px;
-                background: var(--bg);
-            }
+            .list-panel { padding: 15px; background: var(--bg); }
         }
 
-        #map { height: 100%; width: 100%; }
+        #map { height: 100%; width: 100%; z-index: 1; }
 
         /* Cartes de catégories */
         .category-card {
@@ -101,32 +88,27 @@
         .cat-view { background-color: var(--green); }
         .cat-visit { background-color: var(--blue); }
 
-        ul {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
+        ul { list-style: none; padding: 0; margin: 0; }
 
         li {
             padding: 12px 15px;
             border-bottom: 1px solid #eee;
-            cursor: pointer; /* Indique qu'on peut cliquer */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             transition: background 0.2s;
         }
         li:hover { background-color: #f1f5f9; }
         li:last-child { border-bottom: none; }
 
-        .item-name {
-            display: block;
-            font-weight: 600;
-            color: #333;
+        .li-info {
+            cursor: pointer;
+            flex-grow: 1;
+            margin-right: 10px;
         }
-        .item-desc {
-            display: block;
-            font-size: 0.85rem;
-            color: #666;
-            margin-top: 3px;
-        }
+
+        .item-name { display: block; font-weight: 600; color: #333; }
+        .item-desc { display: block; font-size: 0.85rem; color: #666; margin-top: 3px; }
         .item-day {
             display: inline-block;
             font-size: 0.75rem;
@@ -137,7 +119,30 @@
             margin-top: 5px;
         }
 
-        /* Légende simple */
+        /* Bouton GPS */
+        .btn-gps {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: white;
+            color: #333;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 6px 10px;
+            text-decoration: none;
+            font-size: 0.75rem;
+            font-weight: 600;
+            white-space: nowrap;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+            transition: all 0.2s;
+        }
+        .btn-gps:hover {
+            background-color: #333;
+            color: white;
+            border-color: #333;
+        }
+
+        /* Légende */
         .legend-bar {
             background: white;
             padding: 8px;
@@ -149,13 +154,25 @@
         }
         .dot { height: 10px; width: 10px; border-radius: 50%; display: inline-block; margin-right: 4px; }
 
+        /* Popup map style */
+        .popup-btn {
+            display: inline-block;
+            margin-top: 8px;
+            background: #333;
+            color: white !important;
+            padding: 4px 10px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-size: 0.8rem;
+        }
+
     </style>
 </head>
 <body>
 
 <header>
     <h1>Tenerife : Le Carnet</h1>
-    <p class="subtitle">Cliquez sur un lieu pour le voir sur la carte</p>
+    <p class="subtitle">Itinéraires & Adresses</p>
 </header>
 
 <div class="container">
@@ -176,73 +193,109 @@
                 🍽️ Restaurants & Marchés
             </div>
             <ul>
-                <li onclick="focusMap(28.2428, -16.7937)">
-                    <span class="item-name">Restaurante El Rancho</span>
-                    <span class="item-desc">Poulet grillé, ambiance locale sur la route du Teide.</span>
-                    <span class="item-day">Vendredi midi</span>
+                <li>
+                    <div class="li-info" onclick="focusMap(28.2428, -16.7937)">
+                        <span class="item-name">Restaurante El Rancho</span>
+                        <span class="item-desc">Poulet grillé, ambiance locale.</span>
+                        <span class="item-day">Vendredi midi</span>
+                    </div>
+                    <a href="https://www.google.com/maps/search/?api=1&query=Restaurante+El+Rancho+Tenerife" target="_blank" class="btn-gps">📍 GO</a>
                 </li>
-                <li onclick="focusMap(28.3947, -16.6396)">
-                    <span class="item-name">Las Aguas (ou Café local)</span>
-                    <span class="item-desc">Pause déjeuner vers San Juan de la Rambla.</span>
-                    <span class="item-day">Samedi midi</span>
+                <li>
+                    <div class="li-info" onclick="focusMap(28.3947, -16.6396)">
+                        <span class="item-name">Las Aguas (San Juan)</span>
+                        <span class="item-desc">Zone déjeuner bord de mer.</span>
+                        <span class="item-day">Samedi midi</span>
+                    </div>
+                    <a href="https://www.google.com/maps/search/?api=1&query=Restaurante+Las+Aguas+San+Juan+de+la+Rambla" target="_blank" class="btn-gps">📍 GO</a>
                 </li>
-                <li onclick="focusMap(28.0527, -16.7066)">
-                    <span class="item-name">Mercado La Pepa</span>
-                    <span class="item-desc">Food market pour manger ou faire des courses à l'arrivée.</span>
-                    <span class="item-day">Jeudi</span>
+                <li>
+                    <div class="li-info" onclick="focusMap(28.0527, -16.7066)">
+                        <span class="item-name">Mercado La Pepa</span>
+                        <span class="item-desc">Food market & courses.</span>
+                        <span class="item-day">Jeudi 15h30</span>
+                    </div>
+                    <a href="https://www.google.com/maps/search/?api=1&query=La+Pepa+Food+Market+Tenerife" target="_blank" class="btn-gps">📍 GO</a>
                 </li>
-                <li onclick="focusMap(28.4633, -16.2518)">
-                    <span class="item-name">Mercado Ntra. Sra. de África</span>
-                    <span class="item-desc">Le grand marché de Santa Cruz (produits frais).</span>
-                    <span class="item-day">Mardi matin</span>
+                <li>
+                    <div class="li-info" onclick="focusMap(28.4633, -16.2518)">
+                        <span class="item-name">Mercado de África</span>
+                        <span class="item-desc">Grand marché produits frais.</span>
+                        <span class="item-day">Mardi matin</span>
+                    </div>
+                    <a href="https://www.google.com/maps/search/?api=1&query=Mercado+Nuestra+Senora+de+Africa" target="_blank" class="btn-gps">📍 GO</a>
                 </li>
-                <li onclick="focusMap(28.3440, -16.8462)">
-                    <span class="item-name">El Palmar / Buenavista</span>
-                    <span class="item-desc">Zone déjeuner après le Teno.</span>
-                    <span class="item-day">Lundi midi</span>
+                <li>
+                    <div class="li-info" onclick="focusMap(28.3440, -16.8462)">
+                        <span class="item-name">El Palmar / Buenavista</span>
+                        <span class="item-desc">Zone déjeuner après le Teno.</span>
+                        <span class="item-day">Lundi midi</span>
+                    </div>
+                    <a href="https://www.google.com/maps/search/?api=1&query=El+Palmar+Buenavista+del+Norte" target="_blank" class="btn-gps">📍 GO</a>
                 </li>
             </ul>
         </div>
 
         <div class="category-card">
             <div class="cat-header cat-view">
-                👀 Points de vue (Miradors)
+                👀 Points de vue
             </div>
             <ul>
-                <li onclick="focusMap(28.2240, -16.6322)">
-                    <span class="item-name">Roques de García (Teide)</span>
-                    <span class="item-desc">Le fameux rocher "Doigt de Dieu". Incontournable.</span>
-                    <span class="item-day">Vendredi</span>
+                <li>
+                    <div class="li-info" onclick="focusMap(28.2240, -16.6322)">
+                        <span class="item-name">Roques de García</span>
+                        <span class="item-desc">Le doigt de Dieu (Teide).</span>
+                        <span class="item-day">Vendredi</span>
+                    </div>
+                    <a href="https://www.google.com/maps/search/?api=1&query=Roques+de+Garcia+Tenerife" target="_blank" class="btn-gps">📍 GO</a>
                 </li>
-                <li onclick="focusMap(28.2807, -16.7675)">
-                    <span class="item-name">Mirador de los Poleos</span>
-                    <span class="item-desc">Spot magnifique pour le coucher de soleil.</span>
-                    <span class="item-day">Vendredi & Lundi soir</span>
+                <li>
+                    <div class="li-info" onclick="focusMap(28.2807, -16.7675)">
+                        <span class="item-name">Mirador de los Poleos</span>
+                        <span class="item-desc">Spot Sunset.</span>
+                        <span class="item-day">Lundi Soir</span>
+                    </div>
+                    <a href="https://www.google.com/maps/search/?api=1&query=Mirador+de+los+Poleos" target="_blank" class="btn-gps">📍 GO</a>
                 </li>
-                <li onclick="focusMap(28.2383, -16.6982)">
-                    <span class="item-name">Narices del Teide / Samara</span>
-                    <span class="item-desc">Paysages volcaniques noirs.</span>
-                    <span class="item-day">Vendredi</span>
+                <li>
+                    <div class="li-info" onclick="focusMap(28.2383, -16.6982)">
+                        <span class="item-name">Narices del Teide</span>
+                        <span class="item-desc">Paysages volcaniques noirs.</span>
+                        <span class="item-day">Vendredi</span>
+                    </div>
+                    <a href="https://www.google.com/maps/search/?api=1&query=Mirador+Narices+del+Teide" target="_blank" class="btn-gps">📍 GO</a>
                 </li>
-                <li onclick="focusMap(28.2404, -16.8370)">
-                    <span class="item-name">Mirador Archipenque</span>
-                    <span class="item-desc">Meilleure vue sur les falaises de Los Gigantes.</span>
-                    <span class="item-day">Samedi matin</span>
+                <li>
+                    <div class="li-info" onclick="focusMap(28.2404, -16.8370)">
+                        <span class="item-name">Mirador Archipenque</span>
+                        <span class="item-desc">Vue sur Los Gigantes.</span>
+                        <span class="item-day">Samedi matin</span>
+                    </div>
+                    <a href="https://www.google.com/maps/search/?api=1&query=Mirador+Archipenque" target="_blank" class="btn-gps">📍 GO</a>
                 </li>
-                <li onclick="focusMap(28.4822, -16.4345)">
-                    <span class="item-name">Mirador La Garañona</span>
-                    <span class="item-desc">Vue vertigineuse sur la côte nord (El Sauzal).</span>
-                    <span class="item-day">Samedi aprem</span>
+                <li>
+                    <div class="li-info" onclick="focusMap(28.4822, -16.4345)">
+                        <span class="item-name">Mirador La Garañona</span>
+                        <span class="item-desc">Vue côte nord (El Sauzal).</span>
+                        <span class="item-day">Samedi aprem</span>
+                    </div>
+                    <a href="https://www.google.com/maps/search/?api=1&query=Mirador+de+La+Garanona" target="_blank" class="btn-gps">📍 GO</a>
                 </li>
-                <li onclick="focusMap(28.3279, -16.8563)">
-                    <span class="item-name">Mirador de Baracán</span>
-                    <span class="item-desc">La crête entre le nord vert et le sud sec.</span>
-                    <span class="item-day">Lundi matin</span>
+                <li>
+                    <div class="li-info" onclick="focusMap(28.3279, -16.8563)">
+                        <span class="item-name">Mirador de Baracán</span>
+                        <span class="item-desc">Crête Nord/Sud.</span>
+                        <span class="item-day">Lundi matin</span>
+                    </div>
+                    <a href="https://www.google.com/maps/search/?api=1&query=Mirador+Altos+de+Baracan" target="_blank" class="btn-gps">📍 GO</a>
                 </li>
-                <li onclick="focusMap(28.3533, -16.8845)">
-                    <span class="item-name">Teno Alto</span>
-                    <span class="item-desc">Hameau perdu dans les montagnes (fromage de chèvre).</span>
-                    <span class="item-day">Lundi matin</span>
+                <li>
+                    <div class="li-info" onclick="focusMap(28.3533, -16.8845)">
+                        <span class="item-name">Teno Alto</span>
+                        <span class="item-desc">Hameau dans les montagnes.</span>
+                        <span class="item-day">Lundi matin</span>
+                    </div>
+                    <a href="https://www.google.com/maps/search/?api=1&query=Teno+Alto+Tenerife" target="_blank" class="btn-gps">📍 GO</a>
                 </li>
             </ul>
         </div>
@@ -252,40 +305,61 @@
                 📷 Visites & Plages
             </div>
             <ul>
-                <li onclick="focusMap(28.3736, -16.7648)">
-                    <span class="item-name">Garachico</span>
-                    <span class="item-desc">Les piscines naturelles El Caletón.</span>
-                    <span class="item-day">Samedi midi</span>
+                <li>
+                    <div class="li-info" onclick="focusMap(28.3736, -16.7648)">
+                        <span class="item-name">Garachico</span>
+                        <span class="item-desc">Piscines naturelles El Caletón.</span>
+                        <span class="item-day">Samedi midi</span>
+                    </div>
+                    <a href="https://www.google.com/maps/search/?api=1&query=Piscinas+Naturales+El+Caleton+Garachico" target="_blank" class="btn-gps">📍 GO</a>
                 </li>
-                <li onclick="focusMap(28.4780, -16.4385)">
-                    <span class="item-name">Parque Los Lavaderos</span>
-                    <span class="item-desc">Joli parc avec de l'eau à El Sauzal.</span>
-                    <span class="item-day">Samedi aprem</span>
+                <li>
+                    <div class="li-info" onclick="focusMap(28.4780, -16.4385)">
+                        <span class="item-name">Parque Los Lavaderos</span>
+                        <span class="item-desc">Parc à El Sauzal.</span>
+                        <span class="item-day">Samedi aprem</span>
+                    </div>
+                    <a href="https://www.google.com/maps/search/?api=1&query=Parque+Los+Lavaderos+Tenerife" target="_blank" class="btn-gps">📍 GO</a>
                 </li>
-                <li onclick="focusMap(28.4705, -16.4346)">
-                    <span class="item-name">Casa del Vino</span>
-                    <span class="item-desc">Musée et dégustation (Optionnel).</span>
-                    <span class="item-day">Samedi aprem</span>
+                <li>
+                    <div class="li-info" onclick="focusMap(28.4705, -16.4346)">
+                        <span class="item-name">Casa del Vino</span>
+                        <span class="item-desc">Musée et dégustation.</span>
+                        <span class="item-day">Samedi aprem</span>
+                    </div>
+                    <a href="https://www.google.com/maps/search/?api=1&query=Casa+del+Vino+Tenerife" target="_blank" class="btn-gps">📍 GO</a>
                 </li>
-                <li onclick="focusMap(28.0917, -16.7437)">
-                    <span class="item-name">Playa del Duque</span>
-                    <span class="item-desc">Plage calme et chic.</span>
-                    <span class="item-day">Dimanche / Mardi</span>
+                <li>
+                    <div class="li-info" onclick="focusMap(28.0917, -16.7437)">
+                        <span class="item-name">Playa del Duque</span>
+                        <span class="item-desc">Plage calme sud.</span>
+                        <span class="item-day">Dimanche / Mardi</span>
+                    </div>
+                    <a href="https://www.google.com/maps/search/?api=1&query=Playa+del+Duque" target="_blank" class="btn-gps">📍 GO</a>
                 </li>
-                <li onclick="focusMap(28.0527, -16.7244)">
-                    <span class="item-name">Playa Las Vistas</span>
-                    <span class="item-desc">Grande plage aménagée et accessible.</span>
-                    <span class="item-day">Dimanche / Mercredi</span>
+                <li>
+                    <div class="li-info" onclick="focusMap(28.0527, -16.7244)">
+                        <span class="item-name">Playa Las Vistas</span>
+                        <span class="item-desc">Grande plage aménagée.</span>
+                        <span class="item-day">Dimanche / Mercredi</span>
+                    </div>
+                    <a href="https://www.google.com/maps/search/?api=1&query=Playa+Las+Vistas" target="_blank" class="btn-gps">📍 GO</a>
                 </li>
-                 <li onclick="focusMap(28.1816, -16.8170)">
-                    <span class="item-name">Playa San Juan</span>
-                    <span class="item-desc">Plage familiale protégée du vent.</span>
-                    <span class="item-day">Mardi aprem</span>
+                 <li>
+                    <div class="li-info" onclick="focusMap(28.1816, -16.8170)">
+                        <span class="item-name">Playa San Juan</span>
+                        <span class="item-desc">Plage familiale.</span>
+                        <span class="item-day">Mardi aprem</span>
+                    </div>
+                    <a href="https://www.google.com/maps/search/?api=1&query=Playa+San+Juan+Tenerife" target="_blank" class="btn-gps">📍 GO</a>
                 </li>
-                <li onclick="focusMap(28.3045, -16.5666)">
-                    <span class="item-name">Musée El Portillo</span>
-                    <span class="item-desc">Centre de visiteurs du Teide (Gratuit).</span>
-                    <span class="item-day">Vendredi 16h45</span>
+                <li>
+                    <div class="li-info" onclick="focusMap(28.3045, -16.5666)">
+                        <span class="item-name">Musée El Portillo</span>
+                        <span class="item-desc">Visite gratuite Teide.</span>
+                        <span class="item-day">Vendredi 16h45</span>
+                    </div>
+                    <a href="https://www.google.com/maps/search/?api=1&query=Centro+de+Visitantes+El+Portillo" target="_blank" class="btn-gps">📍 GO</a>
                 </li>
             </ul>
         </div>
@@ -318,35 +392,35 @@
         attribution: '© OpenStreetMap'
     }).addTo(map);
 
-    // --- DONNÉES ---
+    // --- DONNÉES AVEC LIENS ---
     var points = [
         // Restos
-        { coords: [28.2428, -16.7937], title: "El Rancho", type: "resto" },
-        { coords: [28.3947, -16.6396], title: "Las Aguas", type: "resto" },
-        { coords: [28.0527, -16.7066], title: "Mercado La Pepa", type: "resto" },
-        { coords: [28.4633, -16.2518], title: "Marché Santa Cruz", type: "resto" },
-        { coords: [28.3440, -16.8462], title: "El Palmar / Buenavista", type: "resto" },
+        { coords: [28.2428, -16.7937], title: "El Rancho", type: "resto", url: "https://www.google.com/maps/search/?api=1&query=Restaurante+El+Rancho+Tenerife" },
+        { coords: [28.3947, -16.6396], title: "Las Aguas", type: "resto", url: "https://www.google.com/maps/search/?api=1&query=Restaurante+Las+Aguas+San+Juan+de+la+Rambla" },
+        { coords: [28.0527, -16.7066], title: "Mercado La Pepa", type: "resto", url: "https://www.google.com/maps/search/?api=1&query=La+Pepa+Food+Market+Tenerife" },
+        { coords: [28.4633, -16.2518], title: "Marché Santa Cruz", type: "resto", url: "https://www.google.com/maps/search/?api=1&query=Mercado+Nuestra+Senora+de+Africa" },
+        { coords: [28.3440, -16.8462], title: "El Palmar / Buenavista", type: "resto", url: "https://www.google.com/maps/search/?api=1&query=El+Palmar+Buenavista+del+Norte" },
 
         // Vues
-        { coords: [28.2240, -16.6322], title: "Roques de García", type: "view" },
-        { coords: [28.2807, -16.7675], title: "Mirador de los Poleos", type: "view" },
-        { coords: [28.2383, -16.6982], title: "Narices del Teide", type: "view" },
-        { coords: [28.2404, -16.8370], title: "Mirador Archipenque", type: "view" },
-        { coords: [28.4822, -16.4345], title: "Mirador Garañona", type: "view" },
-        { coords: [28.3279, -16.8563], title: "Mirador de Baracán", type: "view" },
-        { coords: [28.3533, -16.8845], title: "Teno Alto", type: "view" },
+        { coords: [28.2240, -16.6322], title: "Roques de García", type: "view", url: "https://www.google.com/maps/search/?api=1&query=Roques+de+Garcia+Tenerife" },
+        { coords: [28.2807, -16.7675], title: "Mirador de los Poleos", type: "view", url: "https://www.google.com/maps/search/?api=1&query=Mirador+de+los+Poleos" },
+        { coords: [28.2383, -16.6982], title: "Narices del Teide", type: "view", url: "https://www.google.com/maps/search/?api=1&query=Mirador+Narices+del+Teide" },
+        { coords: [28.2404, -16.8370], title: "Mirador Archipenque", type: "view", url: "https://www.google.com/maps/search/?api=1&query=Mirador+Archipenque" },
+        { coords: [28.4822, -16.4345], title: "Mirador Garañona", type: "view", url: "https://www.google.com/maps/search/?api=1&query=Mirador+de+La+Garanona" },
+        { coords: [28.3279, -16.8563], title: "Mirador de Baracán", type: "view", url: "https://www.google.com/maps/search/?api=1&query=Mirador+Altos+de+Baracan" },
+        { coords: [28.3533, -16.8845], title: "Teno Alto", type: "view", url: "https://www.google.com/maps/search/?api=1&query=Teno+Alto+Tenerife" },
 
         // Visites
-        { coords: [28.3736, -16.7648], title: "Garachico", type: "visit" },
-        { coords: [28.4780, -16.4385], title: "Parque Los Lavaderos", type: "visit" },
-        { coords: [28.4705, -16.4346], title: "Casa del Vino", type: "visit" },
-        { coords: [28.0917, -16.7437], title: "Playa del Duque", type: "visit" },
-        { coords: [28.0527, -16.7244], title: "Playa Las Vistas", type: "visit" },
-        { coords: [28.1816, -16.8170], title: "Playa San Juan", type: "visit" },
-        { coords: [28.3045, -16.5666], title: "Musée El Portillo", type: "visit" },
+        { coords: [28.3736, -16.7648], title: "Garachico", type: "visit", url: "https://www.google.com/maps/search/?api=1&query=Piscinas+Naturales+El+Caleton+Garachico" },
+        { coords: [28.4780, -16.4385], title: "Parque Los Lavaderos", type: "visit", url: "https://www.google.com/maps/search/?api=1&query=Parque+Los+Lavaderos+Tenerife" },
+        { coords: [28.4705, -16.4346], title: "Casa del Vino", type: "visit", url: "https://www.google.com/maps/search/?api=1&query=Casa+del+Vino+Tenerife" },
+        { coords: [28.0917, -16.7437], title: "Playa del Duque", type: "visit", url: "https://www.google.com/maps/search/?api=1&query=Playa+del+Duque" },
+        { coords: [28.0527, -16.7244], title: "Playa Las Vistas", type: "visit", url: "https://www.google.com/maps/search/?api=1&query=Playa+Las+Vistas" },
+        { coords: [28.1816, -16.8170], title: "Playa San Juan", type: "visit", url: "https://www.google.com/maps/search/?api=1&query=Playa+San+Juan+Tenerife" },
+        { coords: [28.3045, -16.5666], title: "Musée El Portillo", type: "visit", url: "https://www.google.com/maps/search/?api=1&query=Centro+de+Visitantes+El+Portillo" },
         
         // Logistique
-        { coords: [28.0444, -16.5725], title: "Aéroport TFS", type: "logistics" }
+        { coords: [28.0444, -16.5725], title: "Aéroport TFS", type: "logistics", url: "https://www.google.com/maps/search/?api=1&query=Aeropuerto+Tenerife+Sur" }
     ];
 
     points.forEach(point => {
@@ -355,14 +429,19 @@
         if (point.type === 'view') chosenIcon = viewIcon;
         if (point.type === 'visit') chosenIcon = visitIcon;
 
+        // Création de la popup avec le bouton GPS
+        var popupContent = `
+            <b>${point.title}</b><br>
+            <a href="${point.url}" target="_blank" class="popup-btn">📍 Lancer GPS</a>
+        `;
+
         L.marker(point.coords, {icon: chosenIcon}).addTo(map)
-            .bindPopup("<b>" + point.title + "</b>");
+            .bindPopup(popupContent);
     });
 
-    // Fonction pour zoomer quand on clique dans la liste
+    // Fonction pour zoomer
     function focusMap(lat, lng) {
         map.flyTo([lat, lng], 13);
-        // Sur mobile, on remonte doucement vers la carte
         if (window.innerWidth < 900) {
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
