@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Road Trip Tenerife - Famille</title>
+    <title>Carnet de Voyage Tenerife</title>
     
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -12,13 +12,10 @@
 
     <style>
         :root {
-            --blue: #2563eb;
-            --green: #16a34a;
-            --orange: #ea580c;
-            --purple: #9333ea;
-            --yellow: #ca8a04;
-            --brown: #78350f;
-            --bg: #f3f4f6;
+            --red: #e63946;
+            --green: #2a9d8f;
+            --blue: #0077b6;
+            --bg: #f8f9fa;
             --card-bg: #ffffff;
         }
 
@@ -31,294 +28,265 @@
         }
 
         header {
-            background: linear-gradient(135deg, #0f172a 0%, #334155 100%);
+            background: #1d3557;
             color: white;
-            padding: 2rem 1rem;
+            padding: 1.5rem 1rem;
             text-align: center;
         }
 
-        h1 { margin: 0; font-size: 1.8rem; }
-        p.subtitle { opacity: 0.8; margin-top: 5px; }
+        h1 { margin: 0; font-size: 1.6rem; }
+        p.subtitle { margin: 5px 0 0; opacity: 0.8; font-size: 0.9rem; }
 
-        /* Layout Carte + Liste */
+        /* Layout */
         .container {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 1rem;
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 20px;
-        }
-
-        @media(min-width: 900px) {
-            .container {
-                grid-template-columns: 1fr 1fr; /* 2 colonnes sur PC */
-            }
-            #map-wrapper {
-                position: sticky;
-                top: 20px;
-                height: calc(100vh - 40px);
-                display: flex;
-                flex-direction: column;
-            }
-             #map { flex-grow: 1; }
-        }
-
-        /* Carte */
-        #map {
-            height: 400px;
-            width: 100%;
-            border-radius: 12px 12px 0 0;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            z-index: 1;
-        }
-        
-        /* Légende sous la carte */
-        .map-legend {
-            background: white;
-            padding: 10px;
-            border-radius: 0 0 12px 12px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            display: flex;
-            flex-wrap: wrap;
-            gap: 15px;
-            justify-content: center;
-            font-size: 0.85rem;
-        }
-        .legend-item { display: flex; align-items: center; }
-        .legend-color { width: 12px; height: 12px; border-radius: 50%; margin-right: 5px; }
-
-        /* Timeline / Itinéraire */
-        .timeline {
             display: flex;
             flex-direction: column;
-            gap: 1.5rem;
+            height: calc(100vh - 80px); /* Hauteur restante */
         }
 
-        .day-card {
-            background: var(--card-bg);
+        /* Sur mobile : carte en haut, listes en bas */
+        @media(min-width: 900px) {
+            .container {
+                flex-direction: row;
+            }
+            .list-panel {
+                width: 40%;
+                overflow-y: auto;
+                padding: 20px;
+            }
+            .map-panel {
+                width: 60%;
+                position: relative;
+            }
+            #map { height: 100%; border-radius: 0; }
+        }
+
+        @media(max-width: 899px) {
+            .map-panel {
+                height: 40vh; /* Carte prend 40% de l'écran */
+                width: 100%;
+                position: sticky;
+                top: 0;
+                z-index: 1000;
+            }
+            .list-panel {
+                padding: 15px;
+                background: var(--bg);
+            }
+        }
+
+        #map { height: 100%; width: 100%; }
+
+        /* Cartes de catégories */
+        .category-card {
+            background: white;
             border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
             overflow: hidden;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            border-left: 6px solid #ccc;
         }
 
-        /* Couleurs des jours */
-        .day-blue { border-left-color: var(--blue); }
-        .day-green { border-left-color: var(--green); }
-        .day-orange { border-left-color: var(--orange); }
-        .day-purple { border-left-color: var(--purple); }
-        .day-yellow { border-left-color: var(--yellow); }
-        .day-brown { border-left-color: var(--brown); }
-
-        .day-header {
-            padding: 10px 15px;
-            font-weight: bold;
+        .cat-header {
+            padding: 12px 15px;
             color: white;
+            font-weight: 600;
             display: flex;
-            justify-content: space-between;
             align-items: center;
+            gap: 10px;
         }
-        
-        .day-blue .day-header { background-color: var(--blue); }
-        .day-green .day-header { background-color: var(--green); }
-        .day-orange .day-header { background-color: var(--orange); }
-        .day-purple .day-header { background-color: var(--purple); }
-        .day-yellow .day-header { background-color: var(--yellow); }
-        .day-brown .day-header { background-color: var(--brown); }
 
-        .activities {
-            padding: 15px;
+        .cat-resto { background-color: var(--red); }
+        .cat-view { background-color: var(--green); }
+        .cat-visit { background-color: var(--blue); }
+
+        ul {
             list-style: none;
+            padding: 0;
             margin: 0;
         }
 
-        .activities li {
-            margin-bottom: 12px;
-            padding-bottom: 12px;
-            border-bottom: 1px solid #f0f0f0;
-            display: flex;
-            gap: 10px;
+        li {
+            padding: 12px 15px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer; /* Indique qu'on peut cliquer */
+            transition: background 0.2s;
         }
-        .activities li:last-child { border-bottom: none; margin-bottom: 0; }
+        li:hover { background-color: #f1f5f9; }
+        li:last-child { border-bottom: none; }
 
-        .time {
+        .item-name {
+            display: block;
             font-weight: 600;
-            min-width: 90px;
-            font-size: 0.9rem;
-            color: #555;
+            color: #333;
         }
-        .detail { flex: 1; }
-        .note { display: block; font-size: 0.85rem; color: #666; font-style: italic; margin-top: 4px; }
-        
-        .btn-google {
+        .item-desc {
+            display: block;
+            font-size: 0.85rem;
+            color: #666;
+            margin-top: 3px;
+        }
+        .item-day {
             display: inline-block;
-            margin-top: 5px;
             font-size: 0.75rem;
-            color: white;
-            background-color: #db4437;
-            padding: 2px 8px;
+            background: #eee;
+            color: #555;
+            padding: 2px 6px;
             border-radius: 4px;
-            text-decoration: none;
+            margin-top: 5px;
         }
+
+        /* Légende simple */
+        .legend-bar {
+            background: white;
+            padding: 8px;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            font-size: 0.8rem;
+            border-bottom: 1px solid #ddd;
+        }
+        .dot { height: 10px; width: 10px; border-radius: 50%; display: inline-block; margin-right: 4px; }
 
     </style>
 </head>
 <body>
 
 <header>
-    <h1>🌴 Tenerife Road Trip</h1>
-    <p class="subtitle">Du 18 au 25 Décembre | Famille</p>
+    <h1>Tenerife : Le Carnet</h1>
+    <p class="subtitle">Cliquez sur un lieu pour le voir sur la carte</p>
 </header>
 
 <div class="container">
     
-    <div id="map-wrapper">
-        <div id="map"></div>
-        <div class="map-legend">
-            <div class="legend-item"><span class="legend-color" style="background:red;"></span>Restaurants</div>
-            <div class="legend-item"><span class="legend-color" style="background:green;"></span>Points de vue</div>
-            <div class="legend-item"><span class="legend-color" style="background:blue;"></span>Visites / Plages</div>
-            <div class="legend-item"><span class="legend-color" style="background:grey;"></span>Logistique</div>
+    <div class="map-panel">
+        <div class="legend-bar">
+            <span><span class="dot" style="background:var(--red)"></span>Miam</span>
+            <span><span class="dot" style="background:var(--green)"></span>Vues</span>
+            <span><span class="dot" style="background:var(--blue)"></span>Visites</span>
         </div>
+        <div id="map"></div>
     </div>
 
-    <div class="timeline">
+    <div class="list-panel">
 
-        <div class="day-card day-blue">
-            <div class="day-header">
-                <span>JEUDI 18</span>
-                <span>🟦 Arrivée</span>
+        <div class="category-card">
+            <div class="cat-header cat-resto">
+                🍽️ Restaurants & Marchés
             </div>
-            <ul class="activities">
-                <li>
-                    <span class="time">13h30</span>
-                    <span class="detail">Arrivée à TFS 🛫<br>
-                        <a href="https://maps.google.com/?q=Aeropuerto+Sur+Tenerife" target="_blank" class="btn-google">Voir map</a>
-                    </span>
+            <ul>
+                <li onclick="focusMap(28.2428, -16.7937)">
+                    <span class="item-name">Restaurante El Rancho</span>
+                    <span class="item-desc">Poulet grillé, ambiance locale sur la route du Teide.</span>
+                    <span class="item-day">Vendredi midi</span>
                 </li>
-                <li>
-                    <span class="time">15h30</span>
-                    <span class="detail">Courses (Mercadona / La Pepa) 🧺</span>
+                <li onclick="focusMap(28.3947, -16.6396)">
+                    <span class="item-name">Las Aguas (ou Café local)</span>
+                    <span class="item-desc">Pause déjeuner vers San Juan de la Rambla.</span>
+                    <span class="item-day">Samedi midi</span>
                 </li>
-                <li>
-                    <span class="time">16h30</span>
-                    <span class="detail">Piscine & Pataugeoire 🏊‍♀️</span>
+                <li onclick="focusMap(28.0527, -16.7066)">
+                    <span class="item-name">Mercado La Pepa</span>
+                    <span class="item-desc">Food market pour manger ou faire des courses à l'arrivée.</span>
+                    <span class="item-day">Jeudi</span>
                 </li>
-                <li>
-                    <span class="time">Soir</span>
-                    <span class="detail">Dîner + Option vue Caleta de los Morteros 🌅</span>
+                <li onclick="focusMap(28.4633, -16.2518)">
+                    <span class="item-name">Mercado Ntra. Sra. de África</span>
+                    <span class="item-desc">Le grand marché de Santa Cruz (produits frais).</span>
+                    <span class="item-day">Mardi matin</span>
                 </li>
-            </ul>
-        </div>
-
-        <div class="day-card day-green">
-            <div class="day-header">
-                <span>VENDREDI 19</span>
-                <span>🟩 Teide & Volcans</span>
-            </div>
-            <ul class="activities">
-                <li><span class="time">11h00</span><span class="detail">Départ calme</span></li>
-                <li><span class="time">12h15</span><span class="detail">Déjeuner EL RANCHO 🍗</span></li>
-                <li>
-                    <span class="time">13h30</span>
-                    <span class="detail"><strong>Safari Teide 🌋</strong><br>
-                    ✔ Mirador de los Poleos<br>
-                    ✔ Narices del Teide<br>
-                    ✔ Samara<br>
-                    ✔ Minas de San José<br>
-                    ✔ Roques de García (Le doigt de dieu)</span>
-                </li>
-                <li><span class="time">16h45</span><span class="detail">Musée El Portillo (Gratuit) 🏛</span></li>
-                <li><span class="time">17h30</span><span class="detail">Retour via Vilaflor</span></li>
-            </ul>
-        </div>
-
-        <div class="day-card day-orange">
-            <div class="day-header">
-                <span>SAMEDI 20</span>
-                <span>🟧 Nord-Ouest & Nord</span>
-            </div>
-            <ul class="activities">
-                <li><span class="time">Matin</span><span class="detail">Los Gigantes (Marina) + Mirador Archipenque</span></li>
-                <li><span class="time">Midi</span><span class="detail">Garachico (Piscines naturelles) + Déjeuner Las Aguas</span></li>
-                <li>
-                    <span class="time">Après-midi</span>
-                    <span class="detail">El Sauzal 🌿<br>
-                    <span class="note">Parque Los Lavaderos + Mirador Garañona. Option: Casa del Vino.</span>
-                    </span>
+                <li onclick="focusMap(28.3440, -16.8462)">
+                    <span class="item-name">El Palmar / Buenavista</span>
+                    <span class="item-desc">Zone déjeuner après le Teno.</span>
+                    <span class="item-day">Lundi midi</span>
                 </li>
             </ul>
         </div>
 
-        <div class="day-card day-purple">
-            <div class="day-header">
-                <span>DIMANCHE 21</span>
-                <span>🟪 Plage & Repos</span>
+        <div class="category-card">
+            <div class="cat-header cat-view">
+                👀 Points de vue (Miradors)
             </div>
-            <ul class="activities">
-                <li>
-                    <span class="time">Journée</span>
-                    <span class="detail">Plages ultra-calmes au choix :<br>
-                    🏖 Playa del Duque<br>
-                    🏖 Playa Torviscas<br>
-                    🏖 Playa Las Vistas</span>
+            <ul>
+                <li onclick="focusMap(28.2240, -16.6322)">
+                    <span class="item-name">Roques de García (Teide)</span>
+                    <span class="item-desc">Le fameux rocher "Doigt de Dieu". Incontournable.</span>
+                    <span class="item-day">Vendredi</span>
                 </li>
-                <li><span class="time">Soir</span><span class="detail">Piscine au logement + Récupération</span></li>
-            </ul>
-        </div>
-
-        <div class="day-card day-yellow">
-            <div class="day-header">
-                <span>LUNDI 22</span>
-                <span>🟨 Teno & Sunset</span>
-            </div>
-            <ul class="activities">
-                <li><span class="time">Matin</span><span class="detail">Route du Teno : Mirador de Baracán & Teno Alto</span></li>
-                <li><span class="time">Midi</span><span class="detail">Déjeuner à El Palmar ou Buenavista</span></li>
-                <li>
-                    <span class="time">17h15</span>
-                    <span class="detail"><strong>Sunset au Teide 🌅</strong><br>
-                    <span class="note">Spot : Mirador de los Poleos. Retour par Chío. Manteaux !</span>
-                    </span>
+                <li onclick="focusMap(28.2807, -16.7675)">
+                    <span class="item-name">Mirador de los Poleos</span>
+                    <span class="item-desc">Spot magnifique pour le coucher de soleil.</span>
+                    <span class="item-day">Vendredi & Lundi soir</span>
+                </li>
+                <li onclick="focusMap(28.2383, -16.6982)">
+                    <span class="item-name">Narices del Teide / Samara</span>
+                    <span class="item-desc">Paysages volcaniques noirs.</span>
+                    <span class="item-day">Vendredi</span>
+                </li>
+                <li onclick="focusMap(28.2404, -16.8370)">
+                    <span class="item-name">Mirador Archipenque</span>
+                    <span class="item-desc">Meilleure vue sur les falaises de Los Gigantes.</span>
+                    <span class="item-day">Samedi matin</span>
+                </li>
+                <li onclick="focusMap(28.4822, -16.4345)">
+                    <span class="item-name">Mirador La Garañona</span>
+                    <span class="item-desc">Vue vertigineuse sur la côte nord (El Sauzal).</span>
+                    <span class="item-day">Samedi aprem</span>
+                </li>
+                <li onclick="focusMap(28.3279, -16.8563)">
+                    <span class="item-name">Mirador de Baracán</span>
+                    <span class="item-desc">La crête entre le nord vert et le sud sec.</span>
+                    <span class="item-day">Lundi matin</span>
+                </li>
+                <li onclick="focusMap(28.3533, -16.8845)">
+                    <span class="item-name">Teno Alto</span>
+                    <span class="item-desc">Hameau perdu dans les montagnes (fromage de chèvre).</span>
+                    <span class="item-day">Lundi matin</span>
                 </li>
             </ul>
         </div>
 
-        <div class="day-card day-orange">
-            <div class="day-header">
-                <span>MARDI 23</span>
-                <span>🟧 Marché & Santa Cruz</span>
+        <div class="category-card">
+            <div class="cat-header cat-visit">
+                📷 Visites & Plages
             </div>
-            <ul class="activities">
-                <li><span class="time">Matin</span><span class="detail">Mercado Nuestra Señora de África (Santa Cruz)<br><span class="note">Achats produits frais pour le réveillon.</span></span></li>
-                <li><span class="time">Midi</span><span class="detail">Courses complémentaires (Mercadona)</span></li>
-                <li><span class="time">Après-midi</span><span class="detail">Plage San Juan ou Playa del Duque</span></li>
-            </ul>
-        </div>
-
-        <div class="day-card day-blue">
-            <div class="day-header">
-                <span>MERCREDI 24</span>
-                <span>🟦 Noël</span>
-            </div>
-            <ul class="activities">
-                <li><span class="time">Matin</span><span class="detail">Plage Torviscas ou Las Vistas</span></li>
-                <li><span class="time">14h00</span><span class="detail">Préparation Réveillon + Piscine filles</span></li>
-                <li><span class="time">Soir</span><span class="detail">🎄 Réveillon au logement</span></li>
-            </ul>
-        </div>
-
-        <div class="day-card day-brown">
-            <div class="day-header">
-                <span>JEUDI 25</span>
-                <span>🟫 Départ</span>
-            </div>
-            <ul class="activities">
-                <li><span class="time">08h30</span><span class="detail">Ménage "No Stress" 🧹</span></li>
-                <li><span class="time">10h00</span><span class="detail">Dernier plouf piscine / Valises</span></li>
-                <li><span class="time">11h00</span><span class="detail">Départ du logement 🚗</span></li>
-                <li><span class="time">14h10</span><span class="detail">Vol Retour 🛫</span></li>
+            <ul>
+                <li onclick="focusMap(28.3736, -16.7648)">
+                    <span class="item-name">Garachico</span>
+                    <span class="item-desc">Les piscines naturelles El Caletón.</span>
+                    <span class="item-day">Samedi midi</span>
+                </li>
+                <li onclick="focusMap(28.4780, -16.4385)">
+                    <span class="item-name">Parque Los Lavaderos</span>
+                    <span class="item-desc">Joli parc avec de l'eau à El Sauzal.</span>
+                    <span class="item-day">Samedi aprem</span>
+                </li>
+                <li onclick="focusMap(28.4705, -16.4346)">
+                    <span class="item-name">Casa del Vino</span>
+                    <span class="item-desc">Musée et dégustation (Optionnel).</span>
+                    <span class="item-day">Samedi aprem</span>
+                </li>
+                <li onclick="focusMap(28.0917, -16.7437)">
+                    <span class="item-name">Playa del Duque</span>
+                    <span class="item-desc">Plage calme et chic.</span>
+                    <span class="item-day">Dimanche / Mardi</span>
+                </li>
+                <li onclick="focusMap(28.0527, -16.7244)">
+                    <span class="item-name">Playa Las Vistas</span>
+                    <span class="item-desc">Grande plage aménagée et accessible.</span>
+                    <span class="item-day">Dimanche / Mercredi</span>
+                </li>
+                 <li onclick="focusMap(28.1816, -16.8170)">
+                    <span class="item-name">Playa San Juan</span>
+                    <span class="item-desc">Plage familiale protégée du vent.</span>
+                    <span class="item-day">Mardi aprem</span>
+                </li>
+                <li onclick="focusMap(28.3045, -16.5666)">
+                    <span class="item-name">Musée El Portillo</span>
+                    <span class="item-desc">Centre de visiteurs du Teide (Gratuit).</span>
+                    <span class="item-day">Vendredi 16h45</span>
+                </li>
             </ul>
         </div>
 
@@ -326,12 +294,10 @@
 </div>
 
 <script>
-    // --- CONFIGURATION DES ICONES ---
-    // On définit les URLs des marqueurs de couleur
+    // --- CONFIGURATION ---
     var baseUrl = "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/";
     var shadowUrl = "https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png";
     
-    // Fonction pour créer une icône facilement
     function createIcon(color) {
         return new L.Icon({
             iconUrl: baseUrl + 'marker-icon-2x-' + color + '.png',
@@ -340,59 +306,67 @@
         });
     }
 
-    // Création des 4 types d'icônes
-    var restoIcon = createIcon('red');      // Rouge pour les restos
-    var viewIcon = createIcon('green');     // Vert pour les points de vue
-    var visitIcon = createIcon('blue');     // Bleu pour les visites classiques
-    var defaultIcon = createIcon('grey');   // Gris pour le reste (aéroport)
-
+    var restoIcon = createIcon('red');
+    var viewIcon = createIcon('green');
+    var visitIcon = createIcon('blue');
+    var defaultIcon = createIcon('grey');
 
     // --- CARTE ---
     var map = L.map('map').setView([28.2916, -16.6291], 10);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap contributors'
+        attribution: '© OpenStreetMap'
     }).addTo(map);
 
-    // --- LISTE DES POINTS AVEC LEUR TYPE ---
-    // Types possibles : 'resto', 'view', 'visit', 'logistics'
+    // --- DONNÉES ---
     var points = [
-        // Logistique
-        { coords: [28.0444, -16.5725], title: "Aéroport TFS", type: "logistics" },
-        
-        // Restaurants (Rouge)
-        { coords: [28.2428, -16.7937], title: "Restaurante El Rancho (Vendredi midi)", type: "resto" },
-        { coords: [28.3947, -16.6396], title: "Restaurante Las Aguas (Samedi midi)", type: "resto" },
+        // Restos
+        { coords: [28.2428, -16.7937], title: "El Rancho", type: "resto" },
+        { coords: [28.3947, -16.6396], title: "Las Aguas", type: "resto" },
+        { coords: [28.0527, -16.7066], title: "Mercado La Pepa", type: "resto" },
+        { coords: [28.4633, -16.2518], title: "Marché Santa Cruz", type: "resto" },
+        { coords: [28.3440, -16.8462], title: "El Palmar / Buenavista", type: "resto" },
 
-        // Points de vue (Vert)
-        { coords: [28.2240, -16.6322], title: "Roques de García (Teide)", type: "view" },
-        { coords: [28.2404, -16.8370], title: "Mirador Archipenque (Los Gigantes)", type: "view" },
-        { coords: [28.2807, -16.7675], title: "Mirador de los Poleos (Sunset Lundi)", type: "view" },
-        { coords: [28.3533, -16.8845], title: "Teno Alto", type: "view" },
+        // Vues
+        { coords: [28.2240, -16.6322], title: "Roques de García", type: "view" },
+        { coords: [28.2807, -16.7675], title: "Mirador de los Poleos", type: "view" },
+        { coords: [28.2383, -16.6982], title: "Narices del Teide", type: "view" },
+        { coords: [28.2404, -16.8370], title: "Mirador Archipenque", type: "view" },
+        { coords: [28.4822, -16.4345], title: "Mirador Garañona", type: "view" },
         { coords: [28.3279, -16.8563], title: "Mirador de Baracán", type: "view" },
-        { coords: [28.4822, -16.4345], title: "Mirador Garañona (El Sauzal)", type: "view" },
+        { coords: [28.3533, -16.8845], title: "Teno Alto", type: "view" },
 
-        // Visites / Plages (Bleu)
-        { coords: [28.3736, -16.7648], title: "Garachico (Piscines)", type: "visit" },
-        { coords: [28.4780, -16.4385], title: "Parque Los Lavaderos (El Sauzal)", type: "visit" },
-        { coords: [28.4636, -16.2518], title: "Marché Santa Cruz", type: "visit" },
+        // Visites
+        { coords: [28.3736, -16.7648], title: "Garachico", type: "visit" },
+        { coords: [28.4780, -16.4385], title: "Parque Los Lavaderos", type: "visit" },
+        { coords: [28.4705, -16.4346], title: "Casa del Vino", type: "visit" },
         { coords: [28.0917, -16.7437], title: "Playa del Duque", type: "visit" },
         { coords: [28.0527, -16.7244], title: "Playa Las Vistas", type: "visit" },
+        { coords: [28.1816, -16.8170], title: "Playa San Juan", type: "visit" },
+        { coords: [28.3045, -16.5666], title: "Musée El Portillo", type: "visit" },
+        
+        // Logistique
+        { coords: [28.0444, -16.5725], title: "Aéroport TFS", type: "logistics" }
     ];
 
-    // --- BOUCLE POUR AFFICHER LES MARQUEURS ---
     points.forEach(point => {
-        // On choisit la bonne icône selon le type
-        var chosenIcon;
-        if (point.type === 'resto') { chosenIcon = restoIcon; }
-        else if (point.type === 'view') { chosenIcon = viewIcon; }
-        else if (point.type === 'visit') { chosenIcon = visitIcon; }
-        else { chosenIcon = defaultIcon; }
+        var chosenIcon = defaultIcon;
+        if (point.type === 'resto') chosenIcon = restoIcon;
+        if (point.type === 'view') chosenIcon = viewIcon;
+        if (point.type === 'visit') chosenIcon = visitIcon;
 
-        // On ajoute le marqueur avec l'icône choisie
         L.marker(point.coords, {icon: chosenIcon}).addTo(map)
             .bindPopup("<b>" + point.title + "</b>");
     });
+
+    // Fonction pour zoomer quand on clique dans la liste
+    function focusMap(lat, lng) {
+        map.flyTo([lat, lng], 13);
+        // Sur mobile, on remonte doucement vers la carte
+        if (window.innerWidth < 900) {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    }
 </script>
 
 </body>
